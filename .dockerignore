@@ -1,0 +1,8 @@
+.venv/
+.env
+.git/
+.gitignore
+__pycache__/
+*.pyc
+reports/
+sample_code/

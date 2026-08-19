@@ -1,0 +1,16 @@
+services:
+  telegram-bot:
+    build: .
+    command: python bot.py
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  watcher:
+    build: .
+    command: python watcher.py
+    env_file:
+      - .env
+    restart: unless-stopped
+    volumes:
+      - ./reports:/app/reports
