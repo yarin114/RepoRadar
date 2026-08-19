@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reporadar-bot
+  namespace: reporadar
+spec:
+  replicas: 1
+  # ⚠️ קריטי: replicas חייב להישאר 1 עבור הבוט.
+  # python-telegram-bot משתמש ב-long polling — כל instance "מושך"
+  # הודעות מטלגרם באותה שיטה. שני instances עם אותו טוקן יתחרו על
+  # אותן הודעות ויתנגשו (Conflict error מטלגרם עצמו, לא רק תיאורטי).
+  # אם רוצים scale אמיתי לבוט טלגרם — עוברים לwebhook, לא polling.
+  selector:
+    matchLabels:
+      app: reporadar-bot
+  template:
+    metadata:
+      labels:
+        app: reporadar-bot
+    spec:
+      containers:
+        - name: reporadar-bot
+          image: ghcr.io/yarin114/reporadar:latest
+          command: ["python", "bot.py"]
+          envFrom:
+            - secretRef:
+                name: reporadar-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reporadar-watcher
+  namespace: reporadar
+spec:
+  replicas: 1
+  # אפשר תיאורטית יותר מ-1 כאן (הwatcher לא מתנגש עם עצמו כמו הבוט),
+  # אבל עם replicas>1 שני watchers יסרקו ויכתבו דוחות כפולים לאותה
+  # תיקייה — נשאיר על 1, ונסביר בראיון שזה טריוויאלי להעלות אם צריך
+  # יותר תדירות סריקה, לא צורך אמיתי כרגע.
+  selector:
+    matchLabels:
+      app: reporadar-watcher
+  template:
+    metadata:
+      labels:
+        app: reporadar-watcher
+    spec:
+      containers:
+        - name: reporadar-watcher
+          image: ghcr.io/yarin114/reporadar:latest
+          command: ["python", "watcher.py"]
+          envFrom:
+            - secretRef:
+                name: reporadar-secrets
