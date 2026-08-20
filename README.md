@@ -102,7 +102,12 @@ kubectl logs -n reporadar deployment/reporadar-watcher
 - **`PYTHONUNBUFFERED=1`** — without it, container logs from `print()` don't
   appear in real time; found this the hard way when `kubectl logs` came back
   empty on a healthy, running pod.
-
+- **Only one live instance of the bot at a time** — hit this in practice: with
+  the bot running simultaneously on a local Docker container, on Kubernetes,
+  and on EC2, Telegram returned `409 Conflict` on `getUpdates` (only one poller
+  per token is allowed). Fixed by scaling the K8s bot deployment to 0 replicas
+  and keeping AWS as the single live instance — a direct, hands-on illustration
+  of why the bot's Deployment is pinned to `replicas: 1`.
 ## What I'd do with more time
 
 - Move the Telegram bot to webhook mode for real horizontal scaling
