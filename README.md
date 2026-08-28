@@ -88,6 +88,10 @@ kubectl logs -n reporadar deployment/reporadar-watcher
 
 ## Design decisions
 
+> Full write-up of every technology choice — why cloud, why AWS, why LangChain,
+> why the Claude API, and why Telegram over WhatsApp — with the trade-offs:
+> [`docs/TECH_CHOICES.md`](docs/TECH_CHOICES.md)
+
 - **LangChain here, not LangGraph** — this is a separate learning project from
   my main product (which uses LangGraph); LangChain's simpler chain model fit
   a small, stateless multi-agent setup better and was faster to learn from scratch.
